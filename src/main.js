@@ -13,6 +13,36 @@ const lightbox = new SimpleLightbox('.gallery a', {
   captionDelay: 250,
 });
 
+const buildGalleryMarkup = hits =>
+  hits
+    .map(
+      ({
+        webformatURL,
+        largeImageURL,
+        tags,
+        likes,
+        views,
+        comments,
+        downloads,
+      }) => `
+      <li class="gallery-item">
+        <a class="gallery-link" href="${largeImageURL}">
+          <img
+            class="gallery-image"
+            src="${webformatURL}"
+            alt="${tags}"
+          />
+          <div class="img-data">
+            <div class="data-values">Likes <p>${likes}</p></div>
+            <div class="data-values">Views <p>${views}</p></div>
+            <div class="data-values">Comments <p>${comments}</p></div>
+            <div class="data-values">Downloads <p>${downloads}</p></div>
+          </div>
+        </a>
+      </li>`
+    )
+    .join('');
+
 form.addEventListener('submit', evt => {
   evt.preventDefault();
   gallery.innerHTML = '<span class="loader"></span>';
@@ -42,40 +72,11 @@ form.addEventListener('submit', evt => {
             '❌ Sorry, there are no images matching your search query. Please try again!',
         });
       }
-      gallery.innerHTML = '';
-      hits.forEach(
-        ({
-          webformatURL,
-          largeImageURL,
-          tags,
-          likes,
-          views,
-          comments,
-          downloads,
-        }) => {
-          gallery.innerHTML += `
-            <li class="gallery-item">
-        <a class="gallery-link" href="${largeImageURL}">
-            <img
-            class="gallery-image"
-            src="${webformatURL}"
-            alt="${tags}"
-            />
-            <div class="img-data">
-        <div class="data-values">Likes <p>${likes}</p></div>
-        <div class="data-values">Views <p>${views}</p></div>
-        <div class="data-values">Comments <p>${comments}</p></div>
-        <div class="data-values">Downloads <p>${downloads}</p></div>
-        </div>
-        </a>
-        </li>
-    `;
-        }
-      );
-
+      gallery.innerHTML = buildGalleryMarkup(hits);
       lightbox.refresh();
     })
     .catch(error => {
+      gallery.innerHTML = '';
       iziToast.error({ message: `Request failed: ${error.message}` });
     })
     .finally(() => form.reset());
